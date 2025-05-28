@@ -579,6 +579,15 @@
     </style>
 </head>
 <body>
+    <div id="loginOverlay" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.15); align-items:center; justify-content:center;">
+        <form id="loginForm" style="background:#fff; padding:32px 28px; border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.18); min-width:320px; max-width:95vw; display:flex; flex-direction:column; gap:18px;">
+          <h2 style="color:#49958e; text-align:center;">Đăng nhập Admin</h2>
+          <input id="adminUser" type="text" placeholder="Tài khoản" required autofocus>
+          <input id="adminPass" type="password" placeholder="Mật khẩu" required>
+          <button type="submit" class="btn btn-primary">Đăng nhập</button>
+          <div id="loginError" style="color:#dc2626; text-align:center; display:none;">Sai tài khoản hoặc mật khẩu!</div>
+        </form>
+      </div>
     <div class="container">
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
@@ -672,6 +681,7 @@
                 </div>
                 <div class="header-right">
                     <div class="current-time" id="currentTime"></div>
+                    <button onclick="logoutAdmin()" class="btn btn-danger" style="margin-left:10px;">Đăng xuất</button>
                 </div>
             </header>
 
@@ -1946,5 +1956,46 @@
             localStorage.setItem(key, JSON.stringify(value));
         }
     </script>
+    <script>
+        function showLogin() {
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            var mainContent = document.getElementById('mainContent');
+            if (mainContent) mainContent.style.display = 'none';
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.style.display = 'none';
+        }
+        function hideLogin() {
+            document.getElementById('loginOverlay').style.display = 'none';
+            document.body.style.overflow = '';
+            var mainContent = document.getElementById('mainContent');
+            if (mainContent) mainContent.style.display = '';
+            var sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.style.display = '';
+        }
+        if (!localStorage.getItem('salon_admin_logged_in')) {
+            showLogin();
+        } else {
+            hideLogin();
+        }
+        var loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.onsubmit = function(e) {
+                e.preventDefault();
+                var user = document.getElementById('adminUser').value.trim();
+                var pass = document.getElementById('adminPass').value;
+                if (user === 'admin' && pass === 'admin123') {
+                    localStorage.setItem('salon_admin_logged_in', '1');
+                    hideLogin();
+                } else {
+                    document.getElementById('loginError').style.display = 'block';
+                }
+            };
+        }
+        function logoutAdmin() {
+            localStorage.removeItem('salon_admin_logged_in');
+            showLogin();
+        }
+        </script>
 </body>
 </html>
