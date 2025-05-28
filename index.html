@@ -129,6 +129,11 @@
             color: #333;
         }
 
+        .option-card.admin {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: #333;
+        }
+
         .option-icon {
             font-size: 32px;
             min-width: 50px;
@@ -259,13 +264,17 @@
         <h1 class="title">Salon Manager</h1>
         <p class="subtitle">Hệ thống quản lý salon tóc</p>
 
-        <!-- Test Login Section -->
-        <div class="test-login">
-            <div class="test-label" id="testLabel">🧪 Đăng nhập trực tiếp (Test)</div>
-        </div>
-
         <!-- Main Options -->
         <div class="options">
+            <a href="admin.html" class="option-card admin" id="adminAccessCard">
+                <div class="option-icon">🛡️</div>
+                <div class="option-content">
+                    <div class="option-title">Quyền quản trị</div>
+                    <div class="option-desc">Truy cập hệ thống quản lý salon</div>
+                </div>
+                <div class="arrow">→</div>
+            </a>
+
             <a href="report.html" class="option-card staff">
                 <div class="option-icon">📊</div>
                 <div class="option-content">
@@ -325,7 +334,7 @@
             if (testLabel) {
                 testLabel.style.cursor = 'pointer';
                 testLabel.addEventListener('click', function() {
-                    window.location.href = 'file:///C:/Users/pytho/Downloads/admin.html';
+                    window.location.href = 'admin.html';
                 });
             }
         });
