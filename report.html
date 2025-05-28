@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo dịch vụ nhân viên</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        .report-container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.10);
+            padding: 36px 24px 28px 24px;
+        }
+        .report-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3a7a75;
+            margin-bottom: 22px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #49958e;
+            font-weight: 500;
+        }
+        input, select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1.5px solid #c3cfe2;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 2px;
+            transition: border 0.2s;
+            background: #f8f9fa;
+        }
+        input:focus, select:focus {
+            border: 1.5px solid #49958e;
+            outline: none;
+            background: #fff;
+        }
+        .multi-select {
+            min-height: 44px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1.5px solid #c3cfe2;
+            padding: 7px 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+        .multi-select label {
+            margin: 0 8px 0 0;
+            font-weight: 400;
+            color: #333;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .multi-select input[type=checkbox] {
+            margin-right: 4px;
+        }
+        .money {
+            font-weight: 600;
+            color: #dc2626;
+            font-size: 16px;
+        }
+        .btn-submit {
+            background: linear-gradient(90deg, #49958e, #3a7a75);
+            color: #fff;
+            border: none;
+            padding: 13px 0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .btn-submit:hover {
+            background: linear-gradient(90deg, #3a7a75, #49958e);
+        }
+        .success-message {
+            color: #16a34a;
+            text-align: center;
+            font-size: 16px;
+            margin-top: 18px;
+        }
+        @media (max-width: 600px) {
+            .report-container {
+                padding: 14px 3vw 12px 3vw;
+            }
+            .report-title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <div class="report-title">Báo cáo dịch vụ nhân viên</div>
+        <form id="staffReportForm">
+            <div class="form-group">
+                <label for="time">Giờ phút thực hiện</label>
+                <input type="time" id="time" name="time" required>
+            </div>
+            <div class="form-group">
+                <label for="staff">Nhân viên thực hiện</label>
+                <select id="staff" name="staff" required>
+                    <option value="">-- Chọn nhân viên --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="customer">Tên khách hàng hoặc số điện thoại</label>
+                <input type="text" id="customer" name="customer" placeholder="Tên khách hàng hoặc số điện thoại">
+            </div>
+            <div class="form-group">
+                <label>Dịch vụ đã thực hiện</label>
+                <div class="multi-select" id="serviceList">
+                    <!-- Dịch vụ sẽ render ở đây -->
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Tổng tiền dịch vụ</label>
+                <div class="money" id="totalMoney">0 VNĐ</div>
+            </div>
+            <div class="form-group">
+                <label for="customerPay">Số tiền khách trả</label>
+                <input type="number" id="customerPay" name="customerPay" min="0" placeholder="Nhập số tiền khách trả">
+            </div>
+            <div class="form-group">
+                <label>Số tiền thối lại</label>
+                <div class="money" id="changeMoney">0 VNĐ</div>
+            </div>
+            <button class="btn-submit" type="submit">Gửi báo cáo</button>
+            <div class="success-message" id="successMsg" style="display:none"></div>
+        </form>
+    </div>
+    <script>
+        // Lấy danh sách nhân viên từ localStorage (giả lập lấy từ management)
+        function getStaffList() {
+            let staff = localStorage.getItem('salon_staff');
+            if (staff) {
+                try { staff = JSON.parse(staff); } catch { staff = []; }
+            } else {
+                staff = [
+                    { name: "Nguyễn Văn An" },
+                    { name: "Trần Thị Bình" },
+                    { name: "Lê Văn Cường" }
+                ];
+            }
+            return staff;
+        }
+        // Lấy danh sách dịch vụ từ localStorage (giả lập lấy từ management)
+        function getServiceList() {
+            let services = localStorage.getItem('salon_services');
+            if (services) {
+                try { services = JSON.parse(services); } catch { services = []; }
+            } else {
+                services = [
+                    { name: "Cắt tóc nam", price: 80000 },
+                    { name: "Cắt tóc nữ", price: 120000 },
+                    { name: "Gội đầu massage", price: 50000 },
+                    { name: "Nhuộm tóc", price: 300000 }
+                ];
+            }
+            return services;
+        }
+        // Render staff select
+        function renderStaffOptions() {
+            const staffList = getStaffList();
+            const select = document.getElementById('staff');
+            select.innerHTML = '<option value="">-- Chọn nhân viên --</option>' +
+                staffList.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+        }
+        // Render service multi-select
+        function renderServiceOptions() {
+            const serviceList = getServiceList();
+            const container = document.getElementById('serviceList');
+            container.innerHTML = serviceList.map((s, i) =>
+                `<label><input type="checkbox" value="${s.name}" data-price="${s.price}"> ${s.name} <span style="color:#dc2626;font-weight:500">(${s.price.toLocaleString('vi-VN')}đ)</span></label>`
+            ).join('');
+        }
+        // Tính tổng tiền dịch vụ
+        function updateTotalMoney() {
+            const checked = document.querySelectorAll('#serviceList input[type=checkbox]:checked');
+            let total = 0;
+            checked.forEach(cb => {
+                total += parseInt(cb.getAttribute('data-price'), 10);
+            });
+            document.getElementById('totalMoney').textContent = total.toLocaleString('vi-VN') + ' VNĐ';
+            return total;
+        }
+        // Tính tiền thối lại
+        function updateChangeMoney() {
+            const total = updateTotalMoney();
+            const pay = parseInt(document.getElementById('customerPay').value, 10) || 0;
+            const change = pay - total;
+            document.getElementById('changeMoney').textContent = (change > 0 ? change : 0).toLocaleString('vi-VN') + ' VNĐ';
+        }
+        // Sự kiện
+        document.addEventListener('DOMContentLoaded', function() {
+            renderStaffOptions();
+            renderServiceOptions();
+            document.getElementById('serviceList').addEventListener('change', updateChangeMoney);
+            document.getElementById('customerPay').addEventListener('input', updateChangeMoney);
+        });
+        // Xử lý submit
+        document.getElementById('staffReportForm').onsubmit = function(e) {
+            e.preventDefault();
+            const time = document.getElementById('time').value;
+            const staff = document.getElementById('staff').value;
+            const customer = document.getElementById('customer').value.trim();
+            const checked = document.querySelectorAll('#serviceList input[type=checkbox]:checked');
+            const services = Array.from(checked).map(cb => ({
+                name: cb.value,
+                price: parseInt(cb.getAttribute('data-price'), 10)
+            }));
+            const total = updateTotalMoney();
+            const pay = parseInt(document.getElementById('customerPay').value, 10) || 0;
+            const change = pay - total;
+            if (!time || !staff || services.length === 0) {
+                alert('Vui lòng nhập đầy đủ thông tin bắt buộc!');
+                return;
+            }
+            // Lưu báo cáo vào localStorage (giả lập)
+            let reports = localStorage.getItem('salon_staff_reports');
+            if (reports) {
+                try { reports = JSON.parse(reports); } catch { reports = []; }
+            } else {
+                reports = [];
+            }
+            reports.push({
+                time, staff, customer, services: services.map(s=>s.name), total, pay, change: change > 0 ? change : 0,
+                created: new Date().toISOString()
+            });
+            localStorage.setItem('salon_staff_reports', JSON.stringify(reports));
+            // Thêm vào Doanh thu (revenue)
+            let revenue = localStorage.getItem('salon_revenue');
+            if (revenue) {
+                try { revenue = JSON.parse(revenue); } catch { revenue = []; }
+            } else {
+                revenue = [];
+            }
+            const today = new Date().toISOString().split('T')[0];
+            services.forEach(s => {
+                revenue.push({
+                    id: Date.now() + Math.floor(Math.random()*100000),
+                    date: today + 'T' + time,
+                    staff: staff,
+                    service: s.name,
+                    customer: customer,
+                    amount: s.price
+                });
+            });
+            localStorage.setItem('salon_revenue', JSON.stringify(revenue));
+            document.getElementById('successMsg').style.display = 'block';
+            document.getElementById('successMsg').textContent = 'Gửi báo cáo thành công!';
+            this.reset();
+            document.getElementById('totalMoney').textContent = '0 VNĐ';
+            document.getElementById('changeMoney').textContent = '0 VNĐ';
+            setTimeout(() => {
+                document.getElementById('successMsg').style.display = 'none';
+            }, 3500);
+        };
+    </script>
+</body>
+</html>
