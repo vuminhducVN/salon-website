@@ -150,6 +150,14 @@
                 <div class="service-price">200.000đ</div>
                 <div class="service-desc">Tư vấn, cắt tóc theo khuôn mặt. Cạo mặt, ráy tai. Lột mụn. Tẩy tế bào chết, rửa mặt, đắp mặt nạ. Massage mặt, gội đầu chuẩn. Xông hơi hút mụn. Massage vai-cổ-gáy. Vuốt sáp tạo kiểu.</div>
             </div>
+            <div class="service-card">
+                <div class="service-title">Cạo mặt, ráy tai, gội đầu</div>
+                <div class="service-desc">Chăm sóc da mặt, ráy tai, gội đầu thư giãn chuyên nghiệp.</div>
+            </div>
+            <div class="service-card">
+                <div class="service-title">Dịch vụ hóa chất (nhuộm/uốn,...)</div>
+                <div class="service-desc">Nhuộm, uốn, phục hồi, tạo kiểu hóa chất chuyên sâu.</div>
+            </div>
         </div>
         <form class="booking-form" id="bookingForm">
             <div class="form-title">Đặt lịch hẹn</div>
@@ -175,6 +183,8 @@
                     <option value="Cắt tóc & xả">Cắt tóc & xả (50.000đ)</option>
                     <option value="Combo 1">Combo 1 (140.000đ)</option>
                     <option value="Combo 2">Combo 2 (200.000đ)</option>
+                    <option value="Cạo mặt, ráy tai, gội đầu">Cạo mặt, ráy tai, gội đầu</option>
+                    <option value="Dịch vụ hóa chất">(từ 300.000đ)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -191,27 +201,41 @@
         // Lấy danh sách thợ từ localStorage (giả lập lấy từ salon_management)
         // Ở bản thực tế sẽ fetch từ backend hoặc window.parent nếu cùng domain
         function getStaffList() {
-            // Giả lập lấy từ localStorage hoặc hardcode
             let staff = localStorage.getItem('salon_staff');
             if (staff) {
                 try { staff = JSON.parse(staff); } catch { staff = []; }
             } else {
                 staff = [
-                    { name: "Nguyễn Văn An" },
-                    { name: "Trần Thị Bình" },
-                    { name: "Lê Văn Cường" }
+                    { name: "Nguyễn Văn An", position: "Barber" },
+                    { name: "Trần Thị Bình", position: "Skinner" },
+                    { name: "Lê Văn Cường", position: "Barber" }
                 ];
             }
-            // Loại bỏ các thợ có tên chứa "thu ngân" (không phân biệt hoa thường)
-            return staff.filter(s => !/thu ngân/i.test(s.name));
+            return staff;
         }
-        // Đổ danh sách thợ vào select
-        function renderStaffOptions() {
+        // Thêm hàm lọc thợ theo dịch vụ:
+        function filterStaffByService(service) {
             const staffList = getStaffList();
+            if (service === 'Cạo mặt, ráy tai, gội đầu') {
+                return staffList.filter(s => s.position === 'Skinner');
+            } else if (service === 'Dịch vụ hóa chất') {
+                return staffList.filter(s => s.position === 'Barber');
+            } else {
+                return staffList.filter(s => s.position === 'Barber');
+            }
+        }
+        // Sửa renderStaffOptions để nhận service:
+        function renderStaffOptions(service) {
+            const staffList = filterStaffByService(service || document.getElementById('service').value);
             const select = document.getElementById('staff');
             select.innerHTML = '<option value="">-- Chọn thợ --</option>' +
                 staffList.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
         }
+        // Gọi lại renderStaffOptions khi chọn dịch vụ:
+        document.getElementById('service').addEventListener('change', function() {
+            renderStaffOptions(this.value);
+        });
+        // Gọi lần đầu:
         renderStaffOptions();
         // Set min date cho input date là hôm nay
         document.getElementById('date').min = new Date().toISOString().split('T')[0];

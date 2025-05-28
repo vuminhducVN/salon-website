@@ -576,6 +576,30 @@
             box-shadow: none;
             letter-spacing: 0.01em;
         }
+        .role-radio-group {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            background: #f8f9fa;
+            border-radius: 18px;
+            padding: 10px 0 6px 0;
+            margin: 12px 0 18px 0;
+        }
+        .role-radio-group label {
+            font-weight: 500;
+            color: #49958e;
+            padding: 4px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .role-radio-group input[type=radio] {
+            accent-color: #49958e;
+            margin-right: 4px;
+        }
     </style>
 </head>
 <body>
@@ -933,7 +957,12 @@
             <h3 id="staffModalTitle">Thêm nhân viên</h3>
             <input id="staffName" type="text" placeholder="Tên nhân viên" />
             <input id="staffPhone" type="text" placeholder="Số điện thoại" />
-            <input id="staffPosition" type="text" placeholder="Chức vụ" />
+            <div id="staffPositionGroup" class="role-radio-group">
+              <label><input type="radio" name="staffPosition" value="Quản lý"> Quản lý</label>
+              <label><input type="radio" name="staffPosition" value="Thu ngân"> Thu ngân</label>
+              <label><input type="radio" name="staffPosition" value="Barber"> Barber</label>
+              <label><input type="radio" name="staffPosition" value="Skinner"> Skinner</label>
+            </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeModal('staffModal')" type="button">Hủy</button>
                 <button class="btn btn-primary" id="saveStaffBtn" type="button">Lưu</button>
@@ -1637,13 +1666,16 @@
                     document.getElementById('staffModalTitle').textContent = 'Sửa nhân viên';
                     document.getElementById('staffName').value = staff ? staff.name : '';
                     document.getElementById('staffPhone').value = staff ? staff.phone : '';
-                    document.getElementById('staffPosition').value = staff ? staff.position : '';
+                    const radios = document.querySelectorAll('input[name="staffPosition"]');
+                    let pos = staff ? staff.position : 'Quản lý';
+                    radios.forEach(r => { r.checked = (r.value === pos); });
                 } else {
                     editingStaffId = null;
                     document.getElementById('staffModalTitle').textContent = 'Thêm nhân viên';
                     document.getElementById('staffName').value = '';
                     document.getElementById('staffPhone').value = '';
-                    document.getElementById('staffPosition').value = '';
+                    const radios = document.querySelectorAll('input[name="staffPosition"]');
+                    radios.forEach(r => { r.checked = false; });
                 }
             }
             if (modalId === 'serviceModal') {
@@ -1725,7 +1757,7 @@
         document.getElementById('saveStaffBtn').onclick = function() {
             const name = document.getElementById('staffName').value.trim();
             const phone = document.getElementById('staffPhone').value.trim();
-            const position = document.getElementById('staffPosition').value.trim();
+            const position = document.querySelector('input[name="staffPosition"]:checked').value;
             if (!name || !phone || !position) {
                 showToast('Vui lòng nhập đầy đủ thông tin!', 'error');
                 return;
